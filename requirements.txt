@@ -1,0 +1,30 @@
+# Core dependencies with version compatibility fixes
+langchain==0.2.16
+langchain-google-genai==1.0.10
+langchain-core==0.2.38
+google-generativeai==0.7.2
+pydantic==2.8.2
+
+# Environment variables
+python-dotenv==1.0.1
+
+# Image processing
+Pillow==10.4.0
+
+# Server dependencies for later
+fastapi==0.109.0
+uvicorn==0.27.0
+python-multipart==0.0.6
+
+# Database for later
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+
+# Utilities
+requests==2.31.0
+
+# Development and testing
+pytest==8.0.0
+pytest-asyncio==0.23.0
+black==24.1.0
+flake8==7.0.0
