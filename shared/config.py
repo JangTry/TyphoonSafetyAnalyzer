@@ -12,24 +12,24 @@ class Config:
         env_path = project_root / '.env'
         load_dotenv(env_path)
         
-        # Google API Key
-        self.google_api_key = os.getenv('GEMINI_API_KEY')
+        # Google API Key - support both GOOGLE_API_KEY and GEMINI_API_KEY
+        self.google_api_key = os.getenv('GOOGLE_API_KEY') or os.getenv('GEMINI_API_KEY')
         
-        # Model settings
-        self.default_model = os.getenv('DEFAULT_MODEL', 'gemini-1.5-flash')
-        self.max_tokens = int(os.getenv('MAX_TOKENS', '1000'))
+        # Model settings - updated to latest Gemini models
+        self.default_model = os.getenv('DEFAULT_MODEL', 'gemini-2.0-flash')
+        self.max_tokens = int(os.getenv('MAX_TOKENS', '2048'))  # Increased for better responses
         self.temperature = float(os.getenv('TEMPERATURE', '0.1'))
         
         # Image processing
         self.max_image_size = (1024, 1024)
-        self.supported_formats = ['.jpg', '.jpeg', '.png', '.bmp']
+        self.supported_formats = ['.jpg', '.jpeg', '.png', '.bmp', '.webp']  # Added webp support
         
         # Debug settings
         self.debug_mode = os.getenv('DEBUG', 'False').lower() == 'true'
         
         # Validate required settings
         if not self.google_api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment variables")
+            raise ValueError("GOOGLE_API_KEY or GEMINI_API_KEY not found in environment variables")
     
     def get_current_timestamp(self) -> str:
         return datetime.now().isoformat()

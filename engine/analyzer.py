@@ -17,19 +17,18 @@ from langchain_core.messages import HumanMessage
 from engine.processors.image_processor import ImageProcessor
 from engine.validators.output_validator import OutputValidator
 from shared.config import Config
-from shared.schemas import AnalysisResult, TyphoonSafetyAssessment
 
 class TyphoonSafetyAnalyzer:
     def __init__(self, debug: bool = False):
         self.debug = debug
         self.config = Config()
         
-        # Use config values for LLM initialization
+        # Use latest Gemini model with updated parameters
         self.llm = ChatGoogleGenerativeAI(
-            model=self.config.default_model,
+            model="gemini-2.0-flash",  # Latest Gemini model
             temperature=self.config.temperature,
-            max_output_tokens=self.config.max_tokens,  # Gemini uses max_output_tokens
-            google_api_key=self.config.google_api_key
+            max_tokens=self.config.max_tokens,  # Use max_tokens for newer versions
+            api_key=self.config.google_api_key  # Use api_key parameter
         )
         self.image_processor = ImageProcessor()
         self.validator = OutputValidator()
@@ -43,8 +42,9 @@ class TyphoonSafetyAnalyzer:
         """Load sample images for debugging"""
         self.sample_images = []
         if self.sample_data_path.exists():
-            for img_file in self.sample_data_path.glob("*.{jpg,jpeg,png,bmp}"):
-                self.sample_images.append(str(img_file))
+            for ext in ['jpg', 'jpeg', 'png', 'bmp']:
+                for img_file in self.sample_data_path.glob(f"*.{ext}"):
+                    self.sample_images.append(str(img_file))
             print(f"Loaded {len(self.sample_images)} sample images for debugging")
     
     def analyze_image(self, image_path: str, guidelines: Optional[str] = None) -> Dict[str, Any]:
@@ -72,15 +72,13 @@ class TyphoonSafetyAnalyzer:
             processed_path = processed_image['processed_path']
             image_base64 = self._encode_image_to_base64(processed_path)
             
-            # Create message with image
+            # Create message with image using latest format
             message = HumanMessage(
                 content=[
                     {"type": "text", "text": prompt},
                     {
                         "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{image_base64}"
-                        }
+                        "image_url": f"data:image/jpeg;base64,{image_base64}"
                     }
                 ]
             )
@@ -94,7 +92,7 @@ class TyphoonSafetyAnalyzer:
             
             if self.debug:
                 print(f"Analysis completed for: {os.path.basename(image_path)}")
-                print(f"Result: {json.dumps(validated_result, indent=2)}")
+                print(f"Result: \n{json.dumps(validated_result, indent=2, ensure_ascii=False)}")
             
             return validated_result
             
@@ -258,4 +256,4 @@ if __name__ == "__main__":
     # Test with sample images
     print("=== Typhoon Safety Analyzer - Debug Mode ===")
     results = analyzer.analyze_sample_images()
-    print(json.dumps(results, indent=2))
+    print(json.dumps(results, indent=2, ensure_ascii=False))
